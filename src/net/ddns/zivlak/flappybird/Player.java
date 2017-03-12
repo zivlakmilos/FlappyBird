@@ -7,14 +7,17 @@ import android.graphics.Rect;
 
 public class Player {
 
-	public static final int SPEED			= 5;
+	public static final int SPEED			= 300;
+	public static final int GRAVITY			= 500;
 
-	private int m_x = 0;
-	private int m_y = 0;
-	private int m_velX = 0;
-	private int m_velY = 0;
-	private int m_width = 100;
-	private int m_height = 100;
+	private double m_x = 0;
+	private double m_y = 0;
+	private double m_velX = 0;
+	private double m_velY = SPEED;
+	private double m_width;
+	private double m_height;
+	private double m_spriteWidth;
+	private double m_spriteHeight;
 
 	private Bitmap m_sprite;
 
@@ -22,63 +25,74 @@ public class Player {
 		m_sprite = sprite;
 		m_width = sprite.getWidth();
 		m_height = sprite.getHeight();
+		m_spriteWidth = m_width;
+		m_spriteHeight = m_height;
 	}
 
-	public void update() {
-		m_y += m_velX;
+	public void update(double tick) {
+
+		m_y += m_velY * tick;
+		m_velY += SPEED * tick;
+
+		if(m_velY > SPEED)
+			m_velY = SPEED;
 	}
 
 	public void render(Canvas canvas) {
-		Rect src = new Rect(0, 0, m_width, m_height);
-		Rect dst = new Rect(0, 0, m_width, m_height);
+		Rect src = new Rect(0, 0, (int)m_spriteWidth, (int)m_spriteHeight);
+		Rect dst = new Rect((int)m_x, (int)m_y, (int)(m_x + m_width), (int)(m_y + m_height));
 		canvas.drawBitmap(m_sprite, src, dst, new Paint());
 	}
 
-	public int getX() {
+	public void jump() {
+		m_velY = -SPEED;
+	}
+
+	public double getX() {
 		return m_x;
 	}
 
-	public void setX(int x) {
+	public void setX(double x) {
 		m_x = x;
 	}
 
-	public int getY() {
+	public double getY() {
 		return m_y;
 	}
 
-	public void setY(int y) {
+	public void setY(double y) {
 		m_y = y;
 	}
 
-	public int getVelX() {
+	public double getVelX() {
 		return m_velX;
 	}
 
-	public void setVelX(int velX) {
+	public void setVelX(double velX) {
 		m_velX = velX;
 	}
 
-	public int getVelY() {
+	public double getVelY() {
 		return m_velY;
 	}
 
-	public void setVelY(int velY) {
+	public void setVelY(double velY) {
 		m_velY = velY;
 	}
 
-	public int getWidth() {
+	public double getWidth() {
 		return m_width;
 	}
 
-	public void setWidth(int width) {
+	public void setWidth(double width) {
 		m_width = width;
 	}
 
-	public int getHeight() {
+	public double getHeight() {
 		return m_height;
 	}
 
-	public void setHeight(int height) {
+	public void setHeight(double height) {
 		m_height = height;
 	}
 }

@@ -4,15 +4,21 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.view.SurfaceView;
 
-public class GameView extends SurfaceView implements Runnable, Callback {
+public class GameView extends SurfaceView implements Runnable, Callback, OnClickListener {
 
 	SurfaceHolder m_holder;
 	boolean m_running = false;
 	Thread m_thread = null;
+	long m_timeLast;
+	double m_tick;
 
 	Player m_player;
 
@@ -21,6 +27,7 @@ public class GameView extends SurfaceView implements Runnable, Callback {
 
 		m_holder = getHolder();
 		m_holder.addCallback(this);
+		setOnClickListener(this);
 
 		Bitmap playerSprite = BitmapFactory.decodeResource(getResources(), R.drawable.flappy);
 		m_player = new Player(playerSprite);
@@ -41,19 +48,31 @@ public class GameView extends SurfaceView implements Runnable, Callback {
 
 	@Override
 	public void run() {
+		m_timeLast = System.currentTimeMillis();
+		m_tick = 0;
+
 		while(m_running) {
 			if(!m_holder.getSurface().isValid())
 				continue;
 
+			m_tick = (System.currentTimeMillis() - m_timeLast) / 1000.0;
+			m_timeLast = System.currentTimeMillis();
+
 			Canvas canvas = m_holder.lockCanvas();
-			update();
+			update(m_tick);
 			render(canvas);
 			m_holder.unlockCanvasAndPost(canvas);
+
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
-	protected void update() {
-		m_player.update();
+	protected void update(double tick) {
+		m_player.update(tick);
 	}
 
 	protected void render(Canvas canvas) {
@@ -74,6 +93,11 @@ public class GameView extends SurfaceView implements Runnable, Callback {
 
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
+	}
+
+	@Override
+	public void onClick(View view) {
+		m_player.jump();
 	}
 
 }
