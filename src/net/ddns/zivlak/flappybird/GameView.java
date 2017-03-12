@@ -51,6 +51,7 @@ public class GameView extends SurfaceView implements Runnable, Callback, OnClick
 		m_timeLast = System.currentTimeMillis();
 		m_tick = 0;
 
+		init();
 		while(m_running) {
 			if(!m_holder.getSurface().isValid())
 				continue;
@@ -69,6 +70,13 @@ public class GameView extends SurfaceView implements Runnable, Callback, OnClick
 				e.printStackTrace();
 			}
 		}
+	}
+
+	protected void init() {
+		m_player.setWidth(100);
+		m_player.setHeight(100);
+		m_player.setX(getWidth() / 2 - m_player.getWidth() / 2);
+		m_player.setY(getHeight() / 2 - m_player.getHeight() / 2);
 	}
 
 	protected void update(double tick) {
