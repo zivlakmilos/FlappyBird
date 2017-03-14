@@ -18,14 +18,21 @@ import android.view.SurfaceView;
 
 public class GameView extends SurfaceView implements Runnable, Callback, OnClickListener {
 
-	SurfaceHolder m_holder;
-	boolean m_running = false;
-	Thread m_thread = null;
-	long m_timeLast;
-	double m_tick;
+	public static final int GAME_STATE_MENU					= 0;
+	public static final int GAME_STATE_GAME					= 1;
+	public static final int GAME_STATE_END					= 2;
 
-	Player m_player;
-	List<Pipe> m_pipes = new ArrayList<Pipe>();
+	private SurfaceHolder m_holder;
+	private boolean m_running = false;
+	private Thread m_thread = null;
+
+	private long m_timeLast;
+	private double m_tick;
+
+	private int m_gameState = GAME_STATE_MENU;
+
+	private Player m_player;
+	private List<Pipe> m_pipes = new ArrayList<Pipe>();
 
 	public GameView(Context context) {
 		super(context);
@@ -83,39 +90,34 @@ public class GameView extends SurfaceView implements Runnable, Callback, OnClick
 		m_player.setHeight(100);
 		m_player.setX(getWidth() / 2 - m_player.getWidth() / 2);
 		m_player.setY(getHeight() / 2 - m_player.getHeight() / 2);
-
-		Random random = new Random(System.currentTimeMillis());
-		Pipe pipe = new Pipe(random.nextInt(getWidth()), (int)m_player.getHeight() * 3);
-		m_pipes.add(pipe);
-
-		for(Pipe p : m_pipes) {
-			p.setX(getWidth());
-		}
 	}
 
 	protected void update(Canvas canvas, double tick) {
 
-		boolean createPipe = false;
-		int removePipe = -1;
+		switch(m_gameState) {
+		case GAME_STATE_GAME:
+			boolean createPipe = false;
+			int removePipe = -1;
 
-		for(Pipe pipe : m_pipes) {
-			pipe.update(canvas, tick);
-			if(pipe.getX() < 0)
-				removePipe = m_pipes.indexOf(pipe);
-			if(pipe.getX() < canvas.getWidth() / 2 && m_pipes.size() < 2)
-				createPipe = true;
-		}
-		if(removePipe >= 0) {
-			m_pipes.remove(removePipe);
-		}
-		if(createPipe) {
-			Random random = new Random(System.currentTimeMillis());
-			Pipe p = new Pipe(random.nextInt(getWidth()), (int)m_player.getHeight() * 3);
-			p.setX(canvas.getWidth());
-			m_pipes.add(p);
-		}
+			for(Pipe pipe : m_pipes) {
+				pipe.update(canvas, tick);
+				if(pipe.getX() < 0)
+					removePipe = m_pipes.indexOf(pipe);
+				if(pipe.getX() < canvas.getWidth() / 2 && m_pipes.size() < 2)
+					createPipe = true;
+			}
+			if(removePipe >= 0) {
+				m_pipes.remove(removePipe);
+			}
+			if(createPipe) {
+				Random random = new Random(System.currentTimeMillis());
+				Pipe p = new Pipe(random.nextInt(getWidth()), (int)m_player.getHeight() * 3);
+				p.setX(canvas.getWidth());
+				m_pipes.add(p);
+			}
 
-		m_player.update(canvas, tick);
+			m_player.update(canvas, tick);
+		}
 	}
 
 	protected void render(Canvas canvas) {
@@ -143,7 +145,19 @@ public class GameView extends SurfaceView implements Runnable, Callback, OnClick
 
 	@Override
 	public void onClick(View view) {
-		m_player.jump();
+
+		switch(m_gameState) {
+		case GAME_STATE_GAME:
+			m_player.jump();
+			break;
+		case GAME_STATE_MENU:
+			m_gameState = GAME_STATE_GAME;
+			Random random = new Random(System.currentTimeMillis());
+			Pipe pipe = new Pipe(random.nextInt(getWidth()), (int)m_player.getHeight() * 3);
+			pipe.setX(getWidth());
+			m_pipes.add(pipe);
+			break;
+		}
 	}
 
 }
