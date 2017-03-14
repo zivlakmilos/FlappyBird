@@ -1,6 +1,5 @@
 package net.ddns.zivlak.flappybird;
 
-import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -10,14 +9,15 @@ public class Pipe {
 
 	public static final int SPEED			= 100;
 
-	private double m_x = 0;
-	private double m_yUp = 0;
-	private double m_yDown = 0;
+	private double m_x;
+	private double m_yUp;
+	private double m_yDown;
 	private double m_width;
 	private double m_heightUp;
 
 	Pipe(int holeY, int holeHeight) {
 
+		m_x = 0;
 		m_yUp = 0;
 		m_yDown = holeY + holeHeight;
 		m_heightUp = holeY;
@@ -43,6 +43,15 @@ public class Pipe {
 								 (int)(m_yDown + canvas.getHeight() - m_yUp - m_heightUp));
 		canvas.drawRect(rectUp, paint);
 		canvas.drawRect(rectDown, paint);
+	}
+
+	public boolean collision(Player player) {
+
+		if(player.getX() + player.getWidth() > m_x && player.getX() < m_x + m_width &&
+				(player.getY() < m_heightUp || player.getY() > m_yDown))
+			return true;
+
+		return false;
 	}
 
 	public double getX() {

@@ -36,11 +36,6 @@ public class Player {
 
 		if(m_velY > SPEED)
 			m_velY = SPEED;
-
-		if(m_y + m_height > canvas.getHeight())
-			m_y = canvas.getHeight() - m_height;
-		else if(m_y < 0)
-			m_y = 0;
 	}
 
 	public void render(Canvas canvas) {
@@ -51,6 +46,12 @@ public class Player {
 
 	public void jump() {
 		m_velY = -SPEED;
+	}
+
+	public boolean collision(Canvas canvas) {
+		if(m_y < 0 || m_y + m_height > canvas.getHeight())
+			return true;
+		return false;
 	}
 
 	public double getX() {

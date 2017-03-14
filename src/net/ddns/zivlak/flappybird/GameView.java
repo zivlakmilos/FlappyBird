@@ -8,6 +8,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
@@ -105,6 +108,9 @@ public class GameView extends SurfaceView implements Runnable, Callback, OnClick
 					removePipe = m_pipes.indexOf(pipe);
 				if(pipe.getX() < canvas.getWidth() / 2 && m_pipes.size() < 2)
 					createPipe = true;
+
+				if(pipe.collision(m_player))
+					m_gameState = GAME_STATE_END;
 			}
 			if(removePipe >= 0) {
 				m_pipes.remove(removePipe);
@@ -117,15 +123,35 @@ public class GameView extends SurfaceView implements Runnable, Callback, OnClick
 			}
 
 			m_player.update(canvas, tick);
+			if(m_player.collision(canvas))
+				m_gameState = GAME_STATE_END;
+			break;
 		}
 	}
 
 	protected void render(Canvas canvas) {
 		canvas.drawRGB(0, 0, 0);
-		for(Pipe pipe : m_pipes) {
-			pipe.render(canvas);
+		switch(m_gameState) {
+		case GAME_STATE_GAME:
+		case GAME_STATE_MENU:
+			for(Pipe pipe : m_pipes) {
+				pipe.render(canvas);
+			}
+			m_player.render(canvas);
+			break;
+		case GAME_STATE_END:
+			String text = "Game Over";
+			Paint paint = new Paint();
+			paint.setColor(Color.RED);
+			paint.setTextSize(25);
+			Rect bounds = new Rect();
+			paint.getTextBounds(text, 0, text.length(), bounds);
+			canvas.drawText(text,
+							canvas.getWidth() / 2 - bounds.width() / 2,
+							canvas.getHeight() / 2 - bounds.height() / 2,
+							paint);
+			break;
 		}
-		m_player.render(canvas);
 	}
 
 	@Override
