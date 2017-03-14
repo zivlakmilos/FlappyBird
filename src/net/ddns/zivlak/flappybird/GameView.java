@@ -1,5 +1,9 @@
 package net.ddns.zivlak.flappybird;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +25,7 @@ public class GameView extends SurfaceView implements Runnable, Callback, OnClick
 	double m_tick;
 
 	Player m_player;
+	List<Pipe> m_pipes = new ArrayList<Pipe>();
 
 	public GameView(Context context) {
 		super(context);
@@ -60,7 +65,7 @@ public class GameView extends SurfaceView implements Runnable, Callback, OnClick
 			m_timeLast = System.currentTimeMillis();
 
 			Canvas canvas = m_holder.lockCanvas();
-			update(m_tick);
+			update(canvas, m_tick);
 			render(canvas);
 			m_holder.unlockCanvasAndPost(canvas);
 
@@ -73,18 +78,51 @@ public class GameView extends SurfaceView implements Runnable, Callback, OnClick
 	}
 
 	protected void init() {
+
 		m_player.setWidth(100);
 		m_player.setHeight(100);
 		m_player.setX(getWidth() / 2 - m_player.getWidth() / 2);
 		m_player.setY(getHeight() / 2 - m_player.getHeight() / 2);
+
+		Random random = new Random(System.currentTimeMillis());
+		Pipe pipe = new Pipe(random.nextInt(getWidth()), (int)m_player.getHeight() * 3);
+		m_pipes.add(pipe);
+
+		for(Pipe p : m_pipes) {
+			p.setX(getWidth());
+		}
 	}
 
-	protected void update(double tick) {
-		m_player.update(tick);
+	protected void update(Canvas canvas, double tick) {
+
+		boolean createPipe = false;
+		int removePipe = -1;
+
+		for(Pipe pipe : m_pipes) {
+			pipe.update(canvas, tick);
+			if(pipe.getX() < 0)
+				removePipe = m_pipes.indexOf(pipe);
+			if(pipe.getX() < canvas.getWidth() / 2 && m_pipes.size() < 2)
+				createPipe = true;
+		}
+		if(removePipe >= 0) {
+			m_pipes.remove(removePipe);
+		}
+		if(createPipe) {
+			Random random = new Random(System.currentTimeMillis());
+			Pipe p = new Pipe(random.nextInt(getWidth()), (int)m_player.getHeight() * 3);
+			p.setX(canvas.getWidth());
+			m_pipes.add(p);
+		}
+
+		m_player.update(canvas, tick);
 	}
 
 	protected void render(Canvas canvas) {
 		canvas.drawRGB(0, 0, 0);
+		for(Pipe pipe : m_pipes) {
+			pipe.render(canvas);
+		}
 		m_player.render(canvas);
 	}
 

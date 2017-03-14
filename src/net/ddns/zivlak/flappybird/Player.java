@@ -10,9 +10,9 @@ public class Player {
 	public static final int SPEED			= 300;
 	public static final int GRAVITY			= 500;
 
-	private double m_x = 0;
-	private double m_y = 0;
-	private double m_velX = 0;
+	private double m_x = 0.0;
+	private double m_y = 0.0;
+	private double m_velX = 0.0;
 	private double m_velY = SPEED;
 	private double m_width;
 	private double m_height;
@@ -29,13 +29,18 @@ public class Player {
 		m_spriteHeight = m_height;
 	}
 
-	public void update(double tick) {
+	public void update(Canvas canvas, double tick) {
 
 		m_y += m_velY * tick;
 		m_velY += SPEED * tick;
 
 		if(m_velY > SPEED)
 			m_velY = SPEED;
+
+		if(m_y + m_height > canvas.getHeight())
+			m_y = canvas.getHeight() - m_height;
+		else if(m_y < 0)
+			m_y = 0;
 	}
 
 	public void render(Canvas canvas) {
